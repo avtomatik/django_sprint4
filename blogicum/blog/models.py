@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 
 from core.models import BaseModel
+
 from .constants import MAX_LENGTH_CHAR, MAX_LENGTH_SLUG
 
 User = get_user_model()
@@ -69,6 +70,11 @@ class Post(BaseModel):
         related_name='posts',
         verbose_name='Категория',
         null=True
+    )
+    image = models.ImageField(
+        'Изображение',
+        upload_to='posts_images',
+        blank=True
     )
 
     class Meta:
