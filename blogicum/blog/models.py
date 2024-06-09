@@ -27,6 +27,9 @@ class Category(BaseModel):
         verbose_name = 'категория'
         verbose_name_plural = 'Категории'
 
+    def __str__(self) -> str:
+        return self.title
+
 
 class Location(BaseModel):
     """Географическая метка"""
@@ -36,6 +39,9 @@ class Location(BaseModel):
     class Meta:
         verbose_name = 'местоположение'
         verbose_name_plural = 'Местоположения'
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Post(BaseModel):
@@ -81,3 +87,19 @@ class Post(BaseModel):
         ordering = ['-pub_date']
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
+
+    def __str__(self) -> str:
+        return self.title
+
+
+class Comment(BaseModel):
+    text = models.TextField('Текст комментария')
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='comments',
+    )
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['created_at']
