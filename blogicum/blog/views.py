@@ -9,7 +9,8 @@ from django.shortcuts import (get_list_or_404, get_object_or_404, redirect,
                               render)
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  UpdateView)
 
 from .forms import CommentForm, PostForm
 from .models import Category, Comment, Post, User
@@ -73,13 +74,22 @@ class CategoryListView(ListView):
         return context
 
 
-def post_detail(request, pk):
-    template = 'blog/detail.html'
-    post = get_object_or_404(fetch_required(Post.objects), pk=pk)
-    context = {
-        'post': post,
-    }
-    return render(request, template, context)
+class PostDetailView(DetailView):
+    """Отдельная страница публикации."""
+
+    model = Post
+    pk_url_kwarg = 'pk_post'
+    template_name = 'blog/detail.html'
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context['form'] = CommentForm()
+        context['post'] = get_object_or_404(
+            fetch_required(Post.objects),
+            pk=self.kwargs['pk_post']
+        )
+        context['comments'] = self.object.comments.all().select_related('post')
+        return context
 
 
 # =============================================================================
