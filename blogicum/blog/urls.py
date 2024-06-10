@@ -38,6 +38,11 @@ urlpatterns = [
         name='edit_comment'
     ),
     path(
+        'posts/create/',
+        views.PostCreateView.as_view(),
+        name='create_post'
+    ),
+    path(
         'profile/<slug:username>/',
         views.ProfileListView.as_view(),
         name='profile'
