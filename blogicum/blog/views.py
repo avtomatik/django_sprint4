@@ -9,11 +9,10 @@ from django.shortcuts import (get_list_or_404, get_object_or_404, redirect,
                               render)
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import CreateView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
-from .forms import CommentForm
+from .forms import CommentForm, PostForm
 from .models import Category, Comment, Post, User
-
 
 PAGINATE_BY = 10
 
@@ -127,6 +126,45 @@ class CommentUpdateView(LoginRequiredMixin, OnlyAuthorMixin, UpdateView):
         return reverse_lazy(
             'blog:post_detail',
             kwargs={'pk_post': self.kwargs['pk_post']}
+        )
+
+
+class CommentDeleteView(LoginRequiredMixin, OnlyAuthorMixin, DeleteView):
+    model = Comment
+    form_class = CommentForm
+    pk_url_kwarg = 'pk_comment'
+    template_name = 'blog/comment.html'
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post = get_object_or_404(
+            Post,
+            pk=self.kwargs['pk_post']
+        )
+        return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            'blog:post_detail',
+            kwargs={'pk_post': self.kwargs['pk_post']}
+        )
+
+
+# =============================================================================
+# Post Model CRUD Classes:
+# =============================================================================
+
+
+class PostDeleteView(LoginRequiredMixin, OnlyAuthorMixin, DeleteView):
+    model = Post
+    form_class = PostForm
+    pk_url_kwarg = 'pk_post'
+    template_name = 'blog/create.html'
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            'blog:profile',
+            kwargs={'username': self.request.user.username}
         )
 
 
