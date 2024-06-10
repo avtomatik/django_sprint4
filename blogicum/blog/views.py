@@ -40,7 +40,7 @@ class OnlyAuthorMixin(UserPassesTestMixin):
 
 
 class PostListView(ListView):
-    """Главная страница"""
+    """Главная страница."""
 
     model = Post
     paginate_by = PAGINATE_BY
@@ -49,7 +49,7 @@ class PostListView(ListView):
 
 
 class CategoryListView(ListView):
-    """Страница категории"""
+    """Страница категории."""
 
     model = Post
     paginate_by = PAGINATE_BY
@@ -191,7 +191,7 @@ class PostDeleteView(LoginRequiredMixin, OnlyAuthorMixin, DeleteView):
 
 
 class ProfileListView(LoginRequiredMixin, ListView):
-    """Страница пользователя"""
+    """Страница пользователя."""
 
     model = Post
     paginate_by = PAGINATE_BY
