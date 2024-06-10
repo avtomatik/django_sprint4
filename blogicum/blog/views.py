@@ -1,18 +1,16 @@
 from typing import Any
 
-from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Count
 from django.db.models.query import QuerySet
 from django.http.response import HttpResponseRedirect
-from django.shortcuts import (get_list_or_404, get_object_or_404, redirect,
-                              render)
+from django.shortcuts import get_list_or_404, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
 
-from .forms import CommentForm, PostForm
+from .forms import CommentForm, PostForm, UserForm
 from .models import Category, Comment, Post, User
 
 PAGINATE_BY = 10
@@ -237,3 +235,18 @@ class ProfileListView(LoginRequiredMixin, ListView):
             username=self.kwargs['username']
         )
         return context
+
+
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = UserForm
+    template_name = 'blog/user.html'
+
+    def get_object(self):
+        return self.request.user
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            'blog:profile',
+            kwargs={'username': self.request.user.username}
+        )

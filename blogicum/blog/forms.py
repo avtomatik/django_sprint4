@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Comment, Post
+from .models import Comment, Post, User
 
 
 class CommentForm(forms.ModelForm):
@@ -22,3 +22,10 @@ class PostForm(forms.ModelForm):
             'text': forms.Textarea({'rows': '5'}),
             'pub_date': forms.DateInput(attrs={'type': 'date'})
         }
+
+
+class UserForm(forms.ModelForm):
+
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'username', 'email')
