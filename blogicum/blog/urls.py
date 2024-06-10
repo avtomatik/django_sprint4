@@ -7,14 +7,14 @@ app_name = 'blog'
 urlpatterns = [
     path('', views.PostListView.as_view(), name='index'),
     path(
-        'posts/<int:pk_post>/',
-        views.PostDetailView.as_view(),
-        name='post_detail'
-    ),
-    path(
         'category/<slug:category_slug>/',
         views.CategoryListView.as_view(),
         name='category_posts'
+    ),
+    path(
+        'posts/<int:pk_post>/',
+        views.PostDetailView.as_view(),
+        name='post_detail'
     ),
     path(
         'posts/<int:pk_post>/comment/',

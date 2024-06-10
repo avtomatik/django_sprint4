@@ -10,10 +10,9 @@ from django.utils import timezone
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
 
+from .constants import PAGINATE_BY
 from .forms import CommentForm, PostForm, UserForm
 from .models import Category, Comment, Post, User
-
-PAGINATE_BY = 10
 
 
 def fetch_required(db_manager):
