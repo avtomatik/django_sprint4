@@ -28,9 +28,14 @@ urlpatterns = [
         name='delete_comment'
     ),
     path(
-        'posts/<int:pk_post>/edit_comment/<int:pk_comment>/',
-        views.CommentUpdateView.as_view(),
-        name='edit_comment'
+        'posts/<int:pk_post>/delete_comment/<int:pk_comment>/',
+        views.CommentDeleteView.as_view(),
+        name='delete_comment'
+    ),
+    path(
+        'posts/<int:pk_post>/edit/',
+        views.PostUpdateView.as_view(),
+        name='edit_post'
     ),
     path(
         'profile/<slug:username>/',

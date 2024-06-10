@@ -155,6 +155,23 @@ class CommentDeleteView(LoginRequiredMixin, OnlyAuthorMixin, DeleteView):
 # =============================================================================
 
 
+class PostUpdateView(LoginRequiredMixin, OnlyAuthorMixin, UpdateView):
+    model = Post
+    form_class = PostForm
+    pk_url_kwarg = 'pk_post'
+    template_name = 'blog/create.html'
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(
+            'blog:post_detail',
+            kwargs={'pk_post': self.kwargs['pk_post']}
+        )
+
+
 class PostDeleteView(LoginRequiredMixin, OnlyAuthorMixin, DeleteView):
     model = Post
     form_class = PostForm
