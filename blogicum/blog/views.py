@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Count
 from django.db.models.query import QuerySet
 from django.http.response import HttpResponseRedirect
-from django.shortcuts import get_list_or_404, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
@@ -59,7 +59,7 @@ class CategoryListView(ListView):
             slug=self.kwargs['category_slug'],
             is_published=True
         )
-        return get_list_or_404(fetch_required(category.posts.all()))
+        return fetch_required(category.posts.all())
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -234,9 +234,12 @@ class ProfileListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self) -> QuerySet[Any]:
         profile = get_object_or_404(User, username=self.kwargs['username'])
-        return get_list_or_404(
-            fetch_required(Post.objects),
+        return Post.objects.filter(
             author=profile
+        ).order_by(
+            '-pub_date'
+        ).annotate(
+            comment_count=Count('comments')
         )
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
