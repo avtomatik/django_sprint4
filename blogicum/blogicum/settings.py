@@ -136,4 +136,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DEFAULT_LIMIT = 5
 
+MEDIA_ROOT = BASE_DIR / 'media'
+
 CSRF_FAILURE_VIEW = 'pages.views.csrf_failure'
