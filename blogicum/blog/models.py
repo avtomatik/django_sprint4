@@ -9,7 +9,7 @@ User = get_user_model()
 
 
 class Category(BaseModel):
-    """Тематическая категория"""
+    """Тематическая категория."""
 
     title = models.CharField('Заголовок', max_length=MAX_LENGTH_CHAR)
     description = models.TextField('Описание')
@@ -32,7 +32,7 @@ class Category(BaseModel):
 
 
 class Location(BaseModel):
-    """Географическая метка"""
+    """Географическая метка."""
 
     name = models.CharField('Название места', max_length=MAX_LENGTH_CHAR)
 
@@ -45,7 +45,7 @@ class Location(BaseModel):
 
 
 class Post(BaseModel):
-    """Публикация"""
+    """Публикация."""
 
     title = models.CharField('Заголовок', max_length=MAX_LENGTH_CHAR)
     text = models.TextField('Текст')
@@ -93,6 +93,8 @@ class Post(BaseModel):
 
 
 class Comment(BaseModel):
+    """Комментарий к публикации."""
+
     text = models.TextField('Текст комментария')
     post = models.ForeignKey(
         Post,

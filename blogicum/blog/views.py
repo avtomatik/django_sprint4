@@ -95,6 +95,8 @@ class PostDetailView(DetailView):
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
+    """Представление для создания комментария."""
+
     model = Comment
     form_class = CommentForm
     pk_url_kwarg = 'pk_post'
@@ -116,6 +118,8 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
 
 class CommentUpdateView(LoginRequiredMixin, OnlyAuthorMixin, UpdateView):
+    """Представление для изменения комментария."""
+
     model = Comment
     form_class = CommentForm
     pk_url_kwarg = 'pk_post'
@@ -137,6 +141,8 @@ class CommentUpdateView(LoginRequiredMixin, OnlyAuthorMixin, UpdateView):
 
 
 class CommentDeleteView(LoginRequiredMixin, OnlyAuthorMixin, DeleteView):
+    """Представление для удаления комментария."""
+
     model = Comment
     form_class = CommentForm
     pk_url_kwarg = 'pk_comment'
@@ -163,6 +169,8 @@ class CommentDeleteView(LoginRequiredMixin, OnlyAuthorMixin, DeleteView):
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
+    """Страница для публикации новых записей."""
+
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
@@ -179,6 +187,8 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
 
 class PostUpdateView(LoginRequiredMixin, OnlyAuthorMixin, UpdateView):
+    """Страница редактирования публикации."""
+
     model = Post
     form_class = PostForm
     pk_url_kwarg = 'pk_post'
@@ -196,6 +206,8 @@ class PostUpdateView(LoginRequiredMixin, OnlyAuthorMixin, UpdateView):
 
 
 class PostDeleteView(LoginRequiredMixin, OnlyAuthorMixin, DeleteView):
+    """Страница удаления публикации."""
+
     model = Post
     form_class = PostForm
     pk_url_kwarg = 'pk_post'
@@ -237,6 +249,8 @@ class ProfileListView(LoginRequiredMixin, ListView):
 
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    """Страница редактирования профиля."""
+
     model = User
     form_class = UserForm
     template_name = 'blog/user.html'
