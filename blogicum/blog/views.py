@@ -1,15 +1,21 @@
+from typing import Any
+
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Count
+from django.db.models.query import QuerySet
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import (get_list_or_404, get_object_or_404, redirect,
                               render)
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, ListView, UpdateView
 
 from .forms import CommentForm
-from .models import Category, Comment, Post
+from .models import Category, Comment, Post, User
+
+
+PAGINATE_BY = 10
 
 
 def fetch_required(db_manager):
@@ -34,13 +40,38 @@ class OnlyAuthorMixin(UserPassesTestMixin):
         return redirect('blog:post_detail', self.kwargs['pk_post'])
 
 
-def index(request):
-    template = 'blog/index.html'
-    post_list = fetch_required(Post.objects)[:settings.DEFAULT_LIMIT]
-    context = {
-        'post_list': post_list,
-    }
-    return render(request, template, context)
+class PostListView(ListView):
+    """Главная страница"""
+
+    model = Post
+    paginate_by = PAGINATE_BY
+    queryset = fetch_required(Post.objects)
+    template_name = 'blog/index.html'
+
+
+class CategoryListView(ListView):
+    """Страница категории"""
+
+    model = Post
+    paginate_by = PAGINATE_BY
+    template_name = 'blog/category.html'
+
+    def get_queryset(self):
+        category = get_object_or_404(
+            Category,
+            slug=self.kwargs['category_slug'],
+            is_published=True
+        )
+        return get_list_or_404(fetch_required(category.posts.all()))
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context['category'] = get_object_or_404(
+            Category,
+            slug=self.kwargs['category_slug'],
+            is_published=True
+        )
+        return context
 
 
 def post_detail(request, pk):
@@ -48,21 +79,6 @@ def post_detail(request, pk):
     post = get_object_or_404(fetch_required(Post.objects), pk=pk)
     context = {
         'post': post,
-    }
-    return render(request, template, context)
-
-
-def category_posts(request, category_slug):
-    template = 'blog/category.html'
-    category = get_object_or_404(
-        Category,
-        slug=category_slug,
-        is_published=True
-    )
-    post_list = get_list_or_404(fetch_required(category.posts.all()))
-    context = {
-        'category': category,
-        'post_list': post_list,
     }
     return render(request, template, context)
 
@@ -112,3 +128,31 @@ class CommentUpdateView(LoginRequiredMixin, OnlyAuthorMixin, UpdateView):
             'blog:post_detail',
             kwargs={'pk_post': self.kwargs['pk_post']}
         )
+
+
+# =============================================================================
+# User Classes:
+# =============================================================================
+
+
+class ProfileListView(LoginRequiredMixin, ListView):
+    """Страница пользователя"""
+
+    model = Post
+    paginate_by = PAGINATE_BY
+    template_name = 'blog/profile.html'
+
+    def get_queryset(self) -> QuerySet[Any]:
+        profile = get_object_or_404(User, username=self.kwargs['username'])
+        return get_list_or_404(
+            fetch_required(Post.objects),
+            author=profile
+        )
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context['profile'] = get_object_or_404(
+            User,
+            username=self.kwargs['username']
+        )
+        return context
