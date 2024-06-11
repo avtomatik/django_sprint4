@@ -73,8 +73,14 @@ class PostDetailView(DetailView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context['form'] = CommentForm()
+
+        post_particular = get_object_or_404(Post, pk=self.kwargs['pk_post'])
+        manager = Post.objects if (
+            post_particular.author == self.request.user
+        ) else Post.objects_tailored
+
         context['post'] = get_object_or_404(
-            Post.objects_tailored.all(),
+            manager.all(),
             pk=self.kwargs['pk_post']
         )
         context['comments'] = self.object.comments.all().select_related('post')
@@ -225,32 +231,19 @@ class ProfileListView(LoginRequiredMixin, ListView):
     template_name = 'blog/profile.html'
 
     def get_queryset(self) -> QuerySet[Any]:
-        # =============================================================================
-        # TODO: Fails @
-        # E           AssertionError: Убедитесь, что страница поста, снятого с публикации, доступна автору этого поста.
-        # E           assert 404 == <HTTPStatus.OK: 200>
-        # E            +  where 404 = <HttpResponse status_code=404, "text/html; charset=utf-8">.status_code
-        # =============================================================================
-        FIELDS = ('author', 'category', 'location')
         profile = get_object_or_404(User, username=self.kwargs['username'])
-        if profile == self.request.user:
-            return Post.objects.select_related(*FIELDS).filter(
-                author=profile
-            ).order_by(
-                '-pub_date'
-            ).annotate(
-                comment_count=Count('comments')
-            )
-        return Post.objects_tailored.select_related(*FIELDS).filter(
-            pub_date__lte=timezone.now(),
-            is_published=True,
-            category__is_published=True
-        ).filter(
+        manager = Post.objects if (
+            profile == self.request.user
+        ) else Post.objects_tailored
+
+        FIELDS = ('author', 'category', 'location')
+
+        return manager.select_related(*FIELDS).filter(
             author=profile
-        ).order_by(
-            '-pub_date'
         ).annotate(
             comment_count=Count('comments')
+        ).order_by(
+            '-pub_date'
         )
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
