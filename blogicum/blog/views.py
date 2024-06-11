@@ -223,7 +223,7 @@ class PostDeleteView(LoginRequiredMixin, OnlyAuthorMixin, DeleteView):
 # =============================================================================
 
 
-class ProfileListView(LoginRequiredMixin, ListView):
+class ProfileListView(ListView):
     """Страница пользователя."""
 
     model = Post
@@ -231,15 +231,15 @@ class ProfileListView(LoginRequiredMixin, ListView):
     template_name = 'blog/profile.html'
 
     def get_queryset(self) -> QuerySet[Any]:
-        profile = get_object_or_404(User, username=self.kwargs['username'])
+        self.author = get_object_or_404(User, username=self.kwargs['username'])
         manager = Post.objects if (
-            profile == self.request.user
+            self.author == self.request.user
         ) else Post.objects_tailored
 
         FIELDS = ('author', 'category', 'location')
 
         return manager.select_related(*FIELDS).filter(
-            author=profile
+            author=self.author
         ).annotate(
             comment_count=Count('comments')
         ).order_by(
@@ -248,10 +248,7 @@ class ProfileListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        context['profile'] = get_object_or_404(
-            User,
-            username=self.kwargs['username']
-        )
+        context['profile'] = self.author
         return context
 
 
