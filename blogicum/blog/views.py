@@ -1,8 +1,5 @@
-from typing import Any
-
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Count
-from django.db.models.query import QuerySet
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -16,7 +13,7 @@ from .models import Category, Comment, Post, User
 
 class OnlyAuthorMixin(UserPassesTestMixin):
 
-    def test_func(self) -> bool | None:
+    def test_func(self):
         object = self.get_object()
         return object.author == self.request.user
 
@@ -52,7 +49,7 @@ class CategoryListView(ListView):
             comment_count=Count('comments')
         )
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['category'] = get_object_or_404(
             Category,
@@ -69,7 +66,7 @@ class PostDetailView(DetailView):
     pk_url_kwarg = 'pk_post'
     template_name = 'blog/detail.html'
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = CommentForm()
 
@@ -229,7 +226,7 @@ class ProfileListView(ListView):
     paginate_by = PAGINATE_BY
     template_name = 'blog/profile.html'
 
-    def get_queryset(self) -> QuerySet[Any]:
+    def get_queryset(self):
         self.author = get_object_or_404(User, username=self.kwargs['username'])
         manager = Post.objects if (
             self.author == self.request.user
@@ -245,7 +242,7 @@ class ProfileListView(ListView):
             '-pub_date'
         )
 
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['profile'] = self.author
         return context
