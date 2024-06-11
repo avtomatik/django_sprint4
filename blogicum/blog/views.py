@@ -15,18 +15,6 @@ from .forms import CommentForm, PostForm, UserForm
 from .models import Category, Comment, Post, User
 
 
-def fetch_required(db_manager):
-    # =========================================================================
-    # TODO: Replace with Custom Manager
-    # =========================================================================
-    FIELDS = ('author', 'category', 'location')
-    return db_manager.select_related(*FIELDS).filter(
-        pub_date__lte=timezone.now(),
-        is_published=True,
-        category__is_published=True
-    ).order_by('-pub_date').annotate(comment_count=Count('comments'))
-
-
 class OnlyAuthorMixin(UserPassesTestMixin):
 
     def test_func(self) -> bool | None:
@@ -42,7 +30,9 @@ class PostListView(ListView):
 
     model = Post
     paginate_by = PAGINATE_BY
-    queryset = fetch_required(Post.objects)
+    queryset = Post.objects_tailored.all().annotate(
+        comment_count=Count('comments')
+    )
     template_name = 'blog/index.html'
 
 
@@ -59,7 +49,9 @@ class CategoryListView(ListView):
             slug=self.kwargs['category_slug'],
             is_published=True
         )
-        return fetch_required(category.posts.all())
+        return Post.objects_tailored.filter(category=category).annotate(
+            comment_count=Count('comments')
+        )
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -82,7 +74,7 @@ class PostDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['form'] = CommentForm()
         context['post'] = get_object_or_404(
-            fetch_required(Post.objects),
+            Post.objects_tailored.all(),
             pk=self.kwargs['pk_post']
         )
         context['comments'] = self.object.comments.all().select_related('post')
@@ -233,8 +225,27 @@ class ProfileListView(LoginRequiredMixin, ListView):
     template_name = 'blog/profile.html'
 
     def get_queryset(self) -> QuerySet[Any]:
+        # =============================================================================
+        # TODO: Fails @
+        # E           AssertionError: Убедитесь, что страница поста, снятого с публикации, доступна автору этого поста.
+        # E           assert 404 == <HTTPStatus.OK: 200>
+        # E            +  where 404 = <HttpResponse status_code=404, "text/html; charset=utf-8">.status_code
+        # =============================================================================
+        FIELDS = ('author', 'category', 'location')
         profile = get_object_or_404(User, username=self.kwargs['username'])
-        return Post.objects.filter(
+        if profile == self.request.user:
+            return Post.objects.select_related(*FIELDS).filter(
+                author=profile
+            ).order_by(
+                '-pub_date'
+            ).annotate(
+                comment_count=Count('comments')
+            )
+        return Post.objects_tailored.select_related(*FIELDS).filter(
+            pub_date__lte=timezone.now(),
+            is_published=True,
+            category__is_published=True
+        ).filter(
             author=profile
         ).order_by(
             '-pub_date'

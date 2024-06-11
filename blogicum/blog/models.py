@@ -4,6 +4,7 @@ from django.db import models
 from core.models import BaseModel
 
 from .constants import MAX_LENGTH_CHAR, MAX_LENGTH_SLUG
+from .managers import PostTailorMadeManager
 
 User = get_user_model()
 
@@ -84,9 +85,11 @@ class Post(BaseModel):
     )
 
     class Meta:
-        ordering = ['-pub_date']
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
+
+    objects = models.Manager()
+    objects_tailored = PostTailorMadeManager()
 
     def __str__(self) -> str:
         return self.title
