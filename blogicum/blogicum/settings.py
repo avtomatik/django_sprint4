@@ -26,6 +26,7 @@ SECRET_KEY = 'django-insecure-4+os4ppcq5&c4+f(y+!azpq$-5si2apg%=fk%fc(&v)3fo-myo
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    '127.0.0.1',
     'www.greenmachine.pythonanywhere.com',
     'greenmachine.pythonanywhere.com',
 ]
