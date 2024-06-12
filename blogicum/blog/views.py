@@ -50,7 +50,9 @@ class CategoryListView(ListView):
             slug=self.kwargs['category_slug'],
             is_published=True
         )
-        return make_comment_annotation(Post.objects_tailored.filter(category=category))
+        return make_comment_annotation(
+            Post.objects_tailored.filter(category=category)
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
