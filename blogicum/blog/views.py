@@ -11,6 +11,13 @@ from .forms import CommentForm, PostForm, UserForm
 from .models import Category, Comment, Post, User
 
 
+def make_comment_annotation(db_manager):
+    # =========================================================================
+    # TODO: Rewrite to Pipe Instead
+    # =========================================================================
+    return db_manager.annotate(comment_count=Count('comments'))
+
+
 class OnlyAuthorMixin(UserPassesTestMixin):
 
     def test_func(self):
@@ -26,9 +33,7 @@ class PostListView(ListView):
 
     model = Post
     paginate_by = PAGINATE_BY
-    queryset = Post.objects_tailored.all().annotate(
-        comment_count=Count('comments')
-    )
+    queryset = make_comment_annotation(Post.objects_tailored.all())
     template_name = 'blog/index.html'
 
 
@@ -45,9 +50,7 @@ class CategoryListView(ListView):
             slug=self.kwargs['category_slug'],
             is_published=True
         )
-        return Post.objects_tailored.filter(category=category).annotate(
-            comment_count=Count('comments')
-        )
+        return make_comment_annotation(Post.objects_tailored.filter(category=category))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -71,12 +74,12 @@ class PostDetailView(DetailView):
         context['form'] = CommentForm()
 
         post_particular = get_object_or_404(Post, pk=self.kwargs['pk_post'])
-        manager = Post.objects if (
+        db_manager = Post.objects.all() if (
             post_particular.author == self.request.user
-        ) else Post.objects_tailored
+        ) else Post.objects_tailored.all()
 
         context['post'] = get_object_or_404(
-            manager.all(),
+            db_manager,
             pk=self.kwargs['pk_post']
         )
         context['comments'] = self.object.comments.all().select_related('post')
@@ -228,16 +231,16 @@ class ProfileListView(ListView):
 
     def get_queryset(self):
         self.author = get_object_or_404(User, username=self.kwargs['username'])
-        manager = Post.objects if (
+        db_manager = Post.objects.all() if (
             self.author == self.request.user
-        ) else Post.objects_tailored
+        ) else Post.objects_tailored.all()
 
         FIELDS = ('author', 'category', 'location')
 
-        return manager.select_related(*FIELDS).filter(
-            author=self.author
-        ).annotate(
-            comment_count=Count('comments')
+        return make_comment_annotation(
+            db_manager.select_related(*FIELDS).filter(
+                author=self.author
+            )
         ).order_by(
             '-pub_date'
         )
