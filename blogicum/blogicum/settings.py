@@ -25,7 +25,10 @@ SECRET_KEY = 'django-insecure-4+os4ppcq5&c4+f(y+!azpq$-5si2apg%=fk%fc(&v)3fo-myo
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'www.greenmachine.pythonanywhere.com',
+    'greenmachine.pythonanywhere.com',
+]
 
 
 # Application definition
